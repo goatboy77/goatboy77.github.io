@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page 1 - Minecraft Hub</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background: linear-gradient(170deg, #012a4a, #05668d); color: #fff; }
+    .wrapper { min-height:100vh; padding:1rem; }
+    nav a { color:#c7eafc; text-decoration:none; font-weight:700; margin-right:1rem; }
+    .panel { background: rgba(255,255,255,.1); padding:1rem; border-radius:12px; border:1px solid rgba(255,255,255,.2); }
+    h1 { margin: 0 0 0.5rem; }
+    p { line-height:1.5; }
+    .call { margin-top:1rem; }
+    .call a { color:#ffd369; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <nav><a href="index.html">← Back to Hub</a></nav>
+    <div class="panel">
+      <h1>Minecraft Hub</h1>
+      <p>This page is ready for your Minecraft setup. Add server IP, resource packs, mod listings, and community links below.</p>
+      <p>Try embedding your favorite content by replacing this area with an iframe, a custom widget, or the game launch link.</p>
+      <div class="call"><strong>Example:</strong> server.mc.example.com</div>
+    </div>
+
+    <div class="panel" style="margin-top:1rem;">
+      <h2>Tuff Client Embed</h2>
+      <p>Use this section to load your Tuff Client in-browser Minecraft client.</p>
+      <label style="display:block; margin:0.5rem 0;">Server address:
+        <input id="tuffServer" type="text" value="play.example.com" style="width:100%; padding:0.4rem; border-radius:8px; border:1px solid rgba(255,255,255,.35); background:rgba(0,0,0,.25); color:#fff;" />
+      </label>
+      <label style="display:block; margin:0.5rem 0;">Version:
+        <select id="tuffVersion" style="width:100%; padding:0.4rem; border-radius:8px; border:1px solid rgba(255,255,255,.35); background:rgba(0,0,0,.25); color:#fff;">
+          <option value="1.12.2">1.12.2</option>
+          <option value="1.8.8">1.8.8</option>
+        </select>
+      </label>
+      <button id="launchTuff" style="background:#f4d35e; border:none; border-radius:10px; padding:0.6rem 1rem; color:#012a4a; font-weight:700; cursor:pointer;">Launch Tuff Client</button>
+      <div id="tuffStatus" style="margin-top:0.6rem; font-size:0.9rem; opacity:0.8;">Status: waiting</div>
+      <div id="tuffEmbed" style="margin-top:1rem; width:100%; aspect-ratio:16/9; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.3); border-radius:10px; overflow:hidden;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('launchTuff').addEventListener('click', async () => {
+      const server = document.getElementById('tuffServer').value.trim();
+      const version = document.getElementById('tuffVersion').value;
+      const status = document.getElementById('tuffStatus');
+      const embed = document.getElementById('tuffEmbed');
+
+      status.textContent = 'Status: loading Tuff Client...';
+      embed.innerHTML = '';
+
+      // Use official Tuff Client script source; replace with your own if needed.
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/gh/TuffClient/TuffClient@latest/tuffclient.min.js';
+      script.onload = () => {
+        status.textContent = 'Status: initializing ' + version + '...';
+        try {
+          if (window.TuffClient) {
+            const container = document.createElement('div');
+            container.style.width = '100%';
+            container.style.height = '100%';
+            embed.appendChild(container);
+
+            window.TuffClient.init({
+              container: container,
+              version: version,
+              server: server,
+              title: 'Tuff Client ' + version,
+              hideChat: false,
+            });
+
+            status.textContent = 'Status: running on ' + server;
+          } else {
+            throw new Error('TuffClient object unavailable');
+          }
+        } catch (e) {
+          status.textContent = 'Error: ' + e.message;
+        }
+      };
+      script.onerror = () => {
+        status.textContent = 'Error: could not load Tuff Client script. Check URL and network.';
+      };
+      document.body.appendChild(script);
+    });
+  </script>
+</body>
+</html>

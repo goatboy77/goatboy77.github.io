@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ocean Game Hub</title>
+  <style>
+    :root {
+      --deep: #012a4a;
+      --sea: #05668d;
+      --foam: #cbe2e7;
+      --sand: #f4d35e;
+      --text: #f8f9fa;
+      --panel: rgba(5, 102, 141, 0.75);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: linear-gradient(170deg, var(--deep) 0%, var(--sea) 60%, #80ced6 100%);
+      overflow-x: hidden;
+    }
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .nav {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .nav a {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 999px;
+      color: #fff;
+      text-decoration: none;
+      padding: 0.65rem 1rem;
+      font-weight: 700;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .nav a:hover { transform: translateY(-2px); background: rgba(255,255,255,0.2); }
+    h1 { font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 0.5rem; text-shadow: 0 0 15px rgba(0,0,0,.4); }
+    p { max-width: 840px; font-size: clamp(1rem, 2.5vw, 1.3rem); line-height: 1.5; text-shadow: 0 0 8px rgba(0,0,0,.18); }
+    .grid {
+      width: min(100%, 1100px);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 16px;
+      padding: 1rem;
+      backdrop-filter: blur(3px);
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    .card a {
+      color: #fff;
+      font-weight: 700;
+      align-self: flex-start;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid rgba(255,255,255,.4);
+      border-radius: 999px;
+      text-decoration: none;
+    }
+    .fullscreen-btn {
+      background: #f4d35e;
+      color: #012a4a;
+      border: none;
+      border-radius: 999px;
+      padding: 0.8rem 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s ease, filter .2s ease;
+    }
+    .fullscreen-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+    .hint {
+      margin-top: 0.45rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    .game-embed {
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 1100px;
+      aspect-ratio: 16 / 9;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.2);
+    }
+    .game-embed iframe,
+    .game-embed div {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    .seashells { position: fixed; bottom: 0; left: 0; width: 100%; height: 170px; background: linear-gradient(180deg, transparent 0%, #f4d35e 75%, #e8c159 100%); clip-path: ellipse(120% 70% at 50% 10%); z-index: 0; }
+    .bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bubble { position: absolute; bottom: -20px; width: 18px; height: 18px; border-radius: 50%; background: hsla(185, 95%, 80%, .7); animation: rise 12s linear infinite; filter: blur(0.5px); }
+    .bubble:nth-child(2) { width: 10px; height: 10px; left: 12%; animation-duration: 8s; animation-delay: 1s; }
+    .bubble:nth-child(3) { width: 22px; height: 22px; left: 32%; animation-duration: 16s; animation-delay: 2s; }
+    .bubble:nth-child(4) { width: 14px; height: 14px; left: 56%; animation-duration: 10s; animation-delay: 1.8s; }
+    .bubble:nth-child(5) { width: 26px; height: 26px; left: 78%; animation-duration: 14s; animation-delay: 0.3s; }
+    .bubble:nth-child(6) { width: 20px; height: 20px; left: 84%; animation-duration: 9s; animation-delay: 4s; }
+    .bubble:nth-child(7) { width: 16px; height: 16px; left: 44%; animation-duration: 13s; animation-delay: 3.5s; }
+    @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: .6; } 70% { opacity: .3; } 100% { transform: translateY(-115vh) scale(1.25); opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div class="bubbles">
+    <div class="bubble" style="left: 8%; animation-delay: 0s;"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+  </div>
+  <div class="app">
+    <nav class="nav" aria-label="Site navigation">
+      <a href="index.html">Main</a>
+      <a href="page1.html">Minecraft Hub</a>
+      <a href="page2.html">Game 2</a>
+      <a href="page3.html">Game 3</a>
+      <a href="page4.html">Game 4</a>
+      <a href="page5.html">Game 5</a>
+    </nav>
+    <h1>Ocean Game Hub</h1>
+    <p>Use this site as your launcher page for games. 5 linked pages are ready for your Minecraft builds and alternative games. Click "Full Screen" to transform the page into an immersive display mode.</p>
+    <button class="fullscreen-btn" id="fullscreenBtn">Go Full Screen</button>
+    <div class="hint">Full screen works in modern browsers and can be toggled with the Esc key to exit.</div>
+
+    <div class="grid" aria-label="Game links">
+      <article class="card">
+        <h2>Minecraft World Portal</h2>
+        <p>Link your Minecraft server site, resource pack, or video walkthrough here.</p>
+        <a href="page1.html">Open Minecraft Hub</a>
+      </article>
+      <article class="card">
+        <h2>Game Page 2</h2>
+        <p>Add links, images, tips, or download details for another favorite game.</p>
+        <a href="page2.html">Open page 2</a>
+      </article>
+      <article class="card">
+        <h2>Game Page 3</h2>
+        <p>Placeholder for Minecraft mods, shaders, or speedruns.</p>
+        <a href="page3.html">Open page 3</a>
+      </article>
+      <article class="card">
+        <h2>Game Page 4</h2>
+        <p>Why not add your own Minecraft server join instructions and address here?</p>
+        <a href="page4.html">Open page 4</a>
+      </article>
+      <article class="card">
+        <h2>Game Page 5</h2>
+        <p>Use this page for screenshots, videos, or embedded online games.</p>
+        <a href="page5.html">Open page 5</a>
+      </article>
+    </div>
+
+    <div class="game-embed" aria-label="Game embed preview" id="gameEmbed">
+      <div class="embed-ui" style="padding:1rem; color:#fff; text-align:left; font-size:0.95rem;" id="embedControls">
+        <strong>Eaglercraft 1.8.8 / 1.12 embed</strong><br>
+        Version:
+        <select id="eaglerVersion" style="margin:0.3rem 0.4rem; border-radius:8px; border:1px solid rgba(255,255,255,.4); background:rgba(0,0,0,.3); color:#fff;">
+          <option value="1.12">1.12</option>
+          <option value="1.8.8">1.8.8</option>
+        </select>
+        Server:
+        <input id="serverAddress" type="text" value="play.example.com" style="width:150px; margin:0.3rem 0.4rem; border-radius:8px; border:1px solid rgba(255,255,255,.4); background:rgba(0,0,0,.3); color:#fff;" />
+        <button id="loadEagler" style="margin:0.3rem 0; border-radius:8px; border:none; padding:0.4rem 0.8rem; background:#f4d35e; color:#012a4a; font-weight:700; cursor:pointer;">Load Game</button>
+        <div id="embedStatus" style="margin-top:0.6rem; font-size:0.88rem; opacity:0.85;">Paste your Eaglercraft snippet below if present. Otherwise use launcher.</div>
+        <textarea id="customEmbedCode" placeholder="Paste Eaglercraft HTML/JS here" style="width:100%; margin-top:0.5rem; min-height:80px; border-radius:8px; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.25); color:#fff;"></textarea>
+        <button id="applyCustomEmbed" style="margin-top:0.4rem; border-radius:8px; border:none; padding:0.4rem 0.8rem; background:#74c69d; color:#012a4a; font-weight:700; cursor:pointer;">Apply Custom Embed</button>
+      </div>
+    </div>
+  </div>
+  <div class="seashells" aria-hidden="true"></div>
+
+  <script>
+    const btn = document.getElementById('fullscreenBtn');
+    btn.addEventListener('click', async () => {
+      const doc = document.documentElement;
+      if (!document.fullscreenElement) {
+        try {
+          await doc.requestFullscreen();
+          btn.textContent = 'Exit Full Screen';
+        } catch (err) {
+          alert('Full screen not supported in this browser.');
+        }
+      } else {
+        await document.exitFullscreen();
+        btn.textContent = 'Go Full Screen';
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      btn.textContent = document.fullscreenElement ? 'Exit Full Screen' : 'Go Full Screen';
+    });
+
+    function setEmbedStatus(message, isError = false) {
+      const statusEl = document.getElementById('embedStatus');
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? '#ffe3e3' : '#cde6ff';
+    }
+
+    function clearEmbed() {
+      const embed = document.getElementById('gameEmbed');
+      embed.innerHTML = '';
+      embed.appendChild(document.createElement('div')).textContent = 'Loading Eaglercraft...';
+      embed.classList.add('loading');
+    }
+
+    function loadEaglercraftLauncher() {
+      const version = document.getElementById('eaglerVersion').value;
+      const server = document.getElementById('serverAddress').value.trim();
+      const container = document.getElementById('gameEmbed');
+      container.innerHTML = `<div id="eaglerContainer" style="width:100%; height:100%;"></div>`;
+
+      // Example Eaglercraft loader. Replace src with your working Eaglercraft URL if needed.
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/gh/Eagler-Craft/eaglercraft@latest/eaglercraft.min.js';
+      script.onload = () => {
+        setEmbedStatus(`Loaded Eaglercraft ${version}. Initializing with server ${server}`);
+        try {
+          if (window.Eaglercraft) {
+            window.Eaglercraft.init({
+              container: 'eaglerContainer',
+              version: version,
+              server: server,
+              title: 'Minecraft ' + version
+            });
+          } else {
+            throw new Error('Eaglercraft object not found after load.');
+          }
+        } catch (error) {
+          setEmbedStatus('Eaglercraft initialization failed: ' + error.message, true);
+        }
+      };
+      script.onerror = () => setEmbedStatus('Failed to load Eaglercraft script - check URL or network.', true);
+      document.body.appendChild(script);
+    }
+
+    document.getElementById('loadEagler').addEventListener('click', () => {
+      setEmbedStatus('Starting Eaglercraft launcher...');
+      loadEaglercraftLauncher();
+    });
+
+    document.getElementById('applyCustomEmbed').addEventListener('click', () => {
+      const code = document.getElementById('customEmbedCode').value.trim();
+      if (!code) {
+        setEmbedStatus('Paste your Eaglercraft snippet first.', true);
+        return;
+      }
+      const container = document.getElementById('gameEmbed');
+      container.innerHTML = code;
+      setEmbedStatus('Custom embed applied. Ensure your script support is valid.');
+    });
+  </script>
+</body>
+</html>
